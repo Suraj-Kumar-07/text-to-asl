@@ -3,6 +3,7 @@ import os
 import cv2
 import imageio
 from flask_cors import CORS
+import random
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +18,16 @@ def serve_video(filename):
 
 @app.route('/send_message', methods=['POST'])
 def sendmessage():
+    folder_path = 'videos'
+    files_in_folder = os.listdir(folder_path)
+    for file_name in files_in_folder:
+        file_path = os.path.join(folder_path, file_name)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {str(e)}")
     data = request.get_json()
     user_message = data.get('message', '').strip()
 
@@ -33,7 +44,8 @@ def sendmessage():
         else:
             print(f"No image found for character: {char}")
 
-    video_url = 'videos/output_video.mp4'
+    count = random.randint(1, 100)
+    video_url = f'videos/output_video_{count}.mp4'
     fps = 2  # Frames per second
 
     writer = imageio.get_writer(video_url, fps=fps)
