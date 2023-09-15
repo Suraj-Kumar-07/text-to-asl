@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Application</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+      }
+      h1 {
+        text-align: center;
+      }
+      .chat-container {
+        max-width: 640px;
+        margin: 0 auto;
+        margin-top: 10px;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .message {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      .message-input {
+        width: 80%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .send-button {
+        width: 100px;
+        background-color: #0099ff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .video-frame {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        max-width: 100%; 
+        height: auto; 
+      }
+      @media screen and (max-width: 480px) {
+         video {
+           width: 350px;
+           height: 200px;
+         }
+         .message-input{
+          margin-bottom: 5px;
+          width: 92%;
+         }
+      }
+      .other-message {
+        text-align: center;
+        margin-top: 20px;
+        background-color: #f2f2f2;
+        color: #000;
+        align-self: flex-start;
+      }
+      .history {
+        padding: 5px;
+        text-align: start !important;
+        background: rgb(181, 184, 183);
+        margin: 1px;
+        /* border: 1px solid black; */
+        /* border-radius: 5px; */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <h1>Text to ASL</h1>
+      <div class="video-frame">
+        <video id="videoPlayer" width="640" height="360" controls>
+          <!-- <source src="../output_video.mp4" type="video/mp4"> -->
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div class="message-input-container">
+        <input
+          type="text"
+          class="message-input"
+          placeholder="Type your message..."
+          id="userMessage"
+        />
+        <button class="send-button" onclick="sendMessage()">Send</button>
+
+        <div class="message other-message" id="messageHistory">
+          Your message history
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function sendMessage() {
+        const userMessageInput = document.getElementById("userMessage");
+        const messageHistory = document.getElementById("messageHistory");
+        const videoPlayer = document.getElementById("videoPlayer");
+
+        // Get the user's input message
+        const userMessage = userMessageInput.value;
+        console.log(userMessage);
+        // Display the user's message in the chat history
+        messageHistory.innerHTML += `<div class='history'>${userMessage}</div>`;
+
+        // Clear the input field
+        userMessageInput.value = "";
+
+        // Send the user's message to the backend (Assuming you have an endpoint /send_message in your Flask app)
+        fetch("http://127.0.0.1:5000/send_message", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: userMessage }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Assuming the backend responds with the video URL
+            console.log(data.videoUrl)
+            console.log(data)
+            if (data.videoUrl) {
+              videoPlayer.src = data.videoUrl;
+              videoPlayer.style.display = "block";
+            }
+          })
+          .catch((error) => {
+            console.error("Error sending message:", error);
+          });
+          return false;
+      }
+    </script>
+  </body>
+</html>
